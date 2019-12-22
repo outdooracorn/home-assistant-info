@@ -8,23 +8,38 @@ instead of the hassio image to make it easier to install other services on the R
 `sudo apt update && sudo apt upgrade -y`
 
 ### Install docker via convenience script
-Source: https://github.com/docker/docker-install
+Source: https://docs.docker.com/install/linux/docker-ce/ubuntu/
 
-> **NOTE**: I had to hack this script to use the disco repo instead of a (currently) non-existent eoan repo.
+#### Install packages to allow apt to use a repository over HTTPS:  
+`sudo apt install apt-transport-https ca-certificates curl gnupg-agent -y`
 
-```
-curl -fsSL https://get.docker.com -o get-docker.sh
-chmod u+x get-docker.sh
-sudo ./get-docker.sh
-```
+#### Add Docker’s official GPG key:  
+`curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -`
+
+#### Add the stable Docker repository:
+> **NOTE**: As of writing Docker is not available for Ubuntu Eoan. Use the previous release by changing `$(lsb_release -cs)` to `disco` in the command below.
+
+`sudo sh -c "echo \"deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" > /etc/apt/sources.list.d/docker.list"`
+
+#### Update the apt package index:  
+`sudo apt update`
+
+#### Install docker-ce:  
+`sudo apt install docker-ce -y`
+
+#### Check docker works:  
+`sudo docker run hello-world`
+
+#### Add the user to the docker group:
+> **NOTE**: This requires logging out and back in again to take effect.
+
+`sudo usermod -aG docker $USER`
 
 ### Install home assistant
 Source: https://www.home-assistant.io/hassio/installation/#preparation
 
 ```
-sudo apt install apparmor-utils apt-transport-https avahi-daemon ca-certificates curl dbus jq network-manager socat -y
+sudo apt install apparmor-utils avahi-daemon dbus jq network-manager socat -y
 sudo systemctl disable ModemManager
-curl -sL "https://raw.githubusercontent.com/home-assistant/hassio-installer/master/hassio_install.sh" -o hassio-install.sh
-chmod u+x hassio-install.sh
-sudo ./hassio-install.sh -m raspberrypi4-64
+curl -sL "https://raw.githubusercontent.com/home-assistant/hassio-installer/master/hassio_install.sh" | sudo bash -s -- -m raspberrypi4-64
 ```
